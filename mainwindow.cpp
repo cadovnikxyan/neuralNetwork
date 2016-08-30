@@ -10,17 +10,40 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete net;
     delete ui;
+}
+template <typename Ch, typename Tr>
+basic_ostream<Ch, Tr>& operator<< (basic_ostream<Ch, Tr>&stm, const neurons_line_print_descriptor &line) {
+    Neuro::neurons_line::const_iterator it = begin(line._line), it_end = end(line._line);
+
+    for (size_t i = 0; i < line._height; ++i) {
+        for (size_t j = 0; j < line._width; ++j) {
+            if (*it > 0)
+                cout << " ";
+            else
+                cout << "0";
+            ++it;
+        }
+        cout << endl;
+    }
+
+    return stm;
 }
 
 void MainWindow::on_start_clicked()
 {
     if(!files.isEmpty()){
-        for(QString filepath : files){
-            src_images.push_back(imageToneuro_line(filepath));
-            Neuro net;
-            net.LearnNeuroNet(src_images);
-        }
+        Neuro::neurons_line line = imageToneuro_line(ui->filepath->text());
+        QImage img(ui->filepath->text());
+        int width = img.width();
+        int height = img.height();
+        Neuro::link_koefs koef=neuro.LearnNeuroNet(src_images);
+        net= new neuro_net_system(koef);
+        std::cout<<neurons_line_print_descriptor(line,width,height);
+        Neuro::neurons_line* tmp= net->recognize(&line);
+        std::cout<<neurons_line_print_descriptor(line,width,height);
+
 
     }else{
         QMessageBox* box = new QMessageBox(this);
@@ -34,10 +57,12 @@ void MainWindow::on_start_clicked()
 
 void MainWindow::on_fileDialog_clicked()
 {
-    QStringList file= QFileDialog::getOpenFileNames(this,tr("Открыть изображения"), "/home/",tr("Image Files (*.png *.jpg *.bmp)"));
-    qDebug()<<file;
-    ui->filepath->setText(file[0]+" ...");
-    files=file;
+    QStringList files__= QFileDialog::getOpenFileNames(this,tr("Открыть изображения"), "/home/ahotchenkov/neuro/",tr("Image Files (*.png *.jpg *.bmp)"));
+    qDebug()<<files__;
+    files=files__;
+    for(QString filepath : files){
+        src_images.push_back(imageToneuro_line(filepath));
+    }
 }
 
 Neuro::neurons_line MainWindow::imageToneuro_line(const QString& filepath)
@@ -67,7 +92,10 @@ Neuro::neurons_line MainWindow::imageToneuro_line(const QString& filepath)
    return result;
 }
 
+
 void MainWindow::on_recognize_clicked()
 {
+    QString file = QFileDialog::getOpenFileName(this,tr("Открыть изображение"), "/home/ahotchenkov/neuro/",tr("Image Files (*.png *.jpg *.bmp)"));
+    ui->filepath->setText(file);
 
 }

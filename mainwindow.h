@@ -24,9 +24,12 @@ class MainWindow : public QMainWindow
     private slots:
         void on_start_clicked();
         void on_fileDialog_clicked();
+        void on_recognize_clicked();
 
     private:
         list<Neuro::neurons_line> src_images;
+        Neuro neuro;
+        neuro_net_system* net;
         Neuro::neurons_line imageToneuro_line(const QString& filepath);
         Ui::MainWindow *ui;
         QStringList files;
